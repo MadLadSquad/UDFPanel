@@ -25,4 +25,4 @@ cd ../../../
 mkdir build || exit
 cd build || exit
 cmake ..
-make -j "${cpus}" || exit
+MSBuild.exe udf-panel.sln -property:Configuration=Release -property:Platform=x64 -property:maxCpuCount="${cpus}" || make -j "${cpus}" || exit
