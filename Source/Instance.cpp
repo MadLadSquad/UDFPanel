@@ -1,0 +1,234 @@
+#include "Instance.hpp"
+
+udf_panel::Instance::Instance()
+{
+    initInfo =
+    {
+        .globalData = this,
+        .bGlobalAllocatedOnHeap = false,
+        UIMGUI_INIT_INFO_DEFAULT_DIRS,
+    };
+}
+
+void udf_panel::Instance::begin()
+{
+    beginAutohandle();
+
+    // Sets up the window to be recognised as a panel
+    UImGui::Window::Platform::setWindowAlwaysOnTop();
+    UImGui::Window::Platform::setWindowType(X11_WINDOW_TYPE_DOCK);
+    UImGui::Window::Platform::setWindowShowingOnPager(false);
+    UImGui::Window::Platform::setWindowShowingOnTaskbar(false);
+
+    // Load module config
+    loadModules();
+
+    for (auto& font : fonts)
+        font.font = ImGui::GetIO().Fonts->AddFontFromFileTTF(font.name.c_str(), font.size, nullptr);
+}
+
+void udf_panel::Instance::tick(float deltaTime)
+{
+    tickAutohandle(deltaTime);
+    ImGui::SetCursorPos({ 0.0f, topMargin});
+
+    if (ImGui::BeginTable("table", columns))
+    {
+        for (size_t i = 0; i < columns; i++)
+        {
+            ImGui::TableNextColumn();
+            for (auto& a : modules[i])
+            {
+                // Update the module timer
+                a.timer += (deltaTime);
+                if (a.type == UDF_PANEL_EXEC_MODULE && static_cast<ExecModule*>(a.data)->column == i)
+                {
+                    auto module = static_cast<ExecModule*>(a.data);
+                    ImGui::PushFont(module->font->font);
+
+                    if (a.refreshAfter >= 0 && a.timer >= a.refreshAfter)
+                    {
+                        a.timer = 0.0f;
+                        a.bShouldRefresh = true;
+                    }
+                    if (a.bShouldRefresh)
+                        executeCommand(*module, module->command.data(), a.bShouldRefresh);
+
+                    ImGui::Text("%s %f", module->internalBuffer.c_str(), deltaTime);
+                    if (ImGui::IsItemHovered())
+                    {
+                        bool tmp = true;
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                            executeCommand(*module, module->onDoubleClick.data(), tmp);
+                        else if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+                            executeCommand(*module, module->onClick.data(), tmp);
+                    }
+                    ImGui::PopFont();
+                }
+                else if (a.type == UDF_PANEL_CUSTOM_MODULE)
+                {
+
+                }
+            }
+        }
+        ImGui::EndTable();
+    }
+}
+
+void udf_panel::Instance::end()
+{
+    endAutohandle();
+
+}
+
+udf_panel::Instance::~Instance()
+{
+
+}
+
+void udf_panel::Instance::onEventConfigureStyle(ImGuiStyle& style, ImGuiIO& io)
+{
+
+}
+
+#define ADD_YAML_VALUE(x, y, z) if (node[x]) \
+    rhs.y = node[x].as<z>()
+
+namespace YAML
+{
+    template<>
+    struct convert<udf_panel::ExecModule>
+    {
+        static Node encode(const udf_panel::ExecModule&) noexcept
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, udf_panel::ExecModule& rhs) noexcept
+        {
+            if (node.IsSequence())
+                return false;
+
+            if (node["module"])
+                rhs.name = node["module"].as<UImGui::FString>();
+
+            ADD_YAML_VALUE("module", name, UImGui::FString);
+            ADD_YAML_VALUE("command", command, UImGui::FString);
+            ADD_YAML_VALUE("on-click", onClick, UImGui::FString);
+            ADD_YAML_VALUE("on-double-click", onDoubleClick, UImGui::FString);
+            ADD_YAML_VALUE("column", column, size_t);
+
+            if (node["font"])
+            {
+                auto f = node["font"].as<UImGui::FString>();
+                for (auto& a : static_cast<udf_panel::Instance*>(UImGui::Instance::getGlobal())->fonts)
+                {
+                    if (a.name == f)
+                    {
+                        rhs.font = &a;
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+    };
+}
+
+
+void udf_panel::Instance::loadModules() noexcept
+{
+    YAML::Node out;
+    try
+    {
+        out = YAML::LoadFile(UIMGUI_CONFIG_DIR"Dist/UDFPanelConfig.yaml");
+    }
+    catch (YAML::BadFile&)
+    {
+        Logger::log("Couldn't open the config file at: ", UVKLog::UVK_LOG_TYPE_ERROR, UIMGUI_CONFIG_DIR"Dist/UDFPanelConfig.yaml");
+        std::terminate();
+    }
+
+    if (out["columns"])
+        columns = out["columns"].as<int>();
+    columns = columns == 0 ? 1 : columns;
+    modules.resize(columns);
+
+    if (out["top-margin"])
+        topMargin = out["top-margin"].as<float>();
+    if (out["position"])
+        position = out["position"].as<UImGui::FVector2>();
+    UImGui::Window::setCurrentWindowPosition(position);
+
+    if (out["size"])
+        size = out["size"].as<UImGui::FVector2>();
+    if (size.x <= 0)
+        size.x = 800;
+    if (size.y <= 0)
+        size.y = 32;
+    UImGui::Window::setWindowSizeInScreenCoords(size);
+
+    if (out["fonts"])
+    {
+        auto f = out["fonts"];
+        for (const auto& font : f)
+        {
+            if (!font["file"])
+                continue;
+            fonts.push_back({ .name = font["font"].as<UImGui::FString>(), .location = font["file"].as<std::string>(), .size = font["size"].as<float>() });
+        }
+    }
+
+    if (out["modules"])
+    {
+        auto f = out["modules"];
+        for (const auto& module : f)
+        {
+            if (!module["type"])
+                continue;
+            if (UImGui::Utility::toLower(module["type"].as<UImGui::FString>().c_str()) == "exec")
+            {
+                execModules.push_back(module.as<ExecModule>());
+                auto& back = execModules.back();
+
+                // Set up columns
+                back.column = back.column >= columns ? columns - 1 : back.column;
+
+                float refreshAfter = -1;
+                if (module["refresh-after"])
+                    refreshAfter = module["refresh-after"].as<float>();
+
+                // Add to modules as part of a column
+                modules[back.column].push_back({ .data = &back, .type = UDF_PANEL_EXEC_MODULE, .refreshAfter = refreshAfter });
+            }
+            else
+            {
+                // TODO: Add plugin modules
+            }
+        }
+    }
+}
+
+void udf_panel::Instance::executeCommand(udf_panel::ExecModule& module, char* command, bool& bShouldRefresh) noexcept
+{
+    module.internalBuffer.clear();
+    module.internalBuffer.resize(256);
+
+    char* const cmds[] = { (char*)"bash", (char*)"-c", command, nullptr };
+    uexec::ScriptRunner runner{};
+    runner.init(cmds, false, true, false);
+
+    size_t totalBytes = 0;
+    while (!runner.finished())
+    {
+        size_t bytesWritten = 0;
+        runner.readSTDOUT(module.internalBuffer, 256, bytesWritten);
+        totalBytes += bytesWritten;
+    }
+    module.internalBuffer.resize(totalBytes);
+
+    runner.destroy();
+    bShouldRefresh = false;
+}
+

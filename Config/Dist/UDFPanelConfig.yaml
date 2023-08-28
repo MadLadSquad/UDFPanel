@@ -1,0 +1,17 @@
+position: [ 1360, 0]      # Coordinates of the top left corner of the panel on the screen
+size: [ 2560, 0 ]            # Set size to 0 to determine width automatically. Height is set to the default value of 24
+top-margin: 8
+columns: 3
+fonts:
+  - font: Font
+    file: font.ttf
+    size: 16
+modules:
+  - module: Test
+    type: exec
+    command: "printf \"exec\""
+    on-click: "printf \"exec on click\""
+    on-double-click: "printf \"exec on double click\""
+    font: Font
+    refresh-after: -1
+    column: 1

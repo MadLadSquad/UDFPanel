@@ -1,0 +1,33 @@
+name: "udf-panel"
+version: "1.0.0.0"
+engine-version: "1.0.0.0"
+build-mode-static: false
+build-mode-vendor: false
+system-wide: true
+install-framework: true
+enabled-modules:
+  os: true
+  dbus: true
+  uexec: false
+  theming: true
+  notifications: false
+  polkit: false
+  ufont: false
+  i18n: true
+  undo_redo: false
+  plotting: false
+  knobs: false
+  spinners: false
+  toggles: false
+  text_utils: false
+  cli_parser: false
+additional-installs:
+  unix:
+    - file: Config/Dist/com.madladsquad.udf-panel.desktop
+      directory: share/applications
+      macro-name: UDF_PANEL_DESKTOP_FILE_DIR
+      is-directory: false
+    - file: Content/udf-panel.png
+      directory: share/icons
+      macro-name: UDF_PANEL_ICON_DIR
+      is-directory: false

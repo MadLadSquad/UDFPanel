@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=UntitledDesktop Flow Panel
+GenericName=Panel
+Comment=Minimal and highly customisable panel
+Icon=udf-panel
+TryExec=udf-panel
+Exec=udf-panel
+Categories=System;Utility;
+Terminal=false
+StartupNotify=false
