@@ -1,6 +1,7 @@
 #pragma once
 #include <Framework.hpp>
 #include <Generated/Config.hpp>
+#include "MainView.hpp"
 
 namespace udf_panel
 {
@@ -59,6 +60,10 @@ namespace udf_panel
 
         std::vector<Font> fonts;
     private:
+        friend class MainView;
+
+        MainView mainView;
+
         // TODO: Add plugin modules
         std::vector<ExecModule> execModules;
         std::vector<std::vector<Module>> modules;
@@ -70,7 +75,6 @@ namespace udf_panel
         int columns = 1;
 
         void loadModules() noexcept;
-        static void executeCommand(ExecModule& module, char* command, bool& bShouldRefresh) noexcept;
     };
 }
 
