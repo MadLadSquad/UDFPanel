@@ -72,11 +72,10 @@ namespace YAML
             if (node["module"])
                 rhs.name = node["module"].as<UImGui::FString>();
 
-            ADD_YAML_VALUE("module", name, UImGui::FString);
             ADD_YAML_VALUE("command", command, UImGui::FString);
             ADD_YAML_VALUE("on-click", onClick, UImGui::FString);
             ADD_YAML_VALUE("on-double-click", onDoubleClick, UImGui::FString);
-            ADD_YAML_VALUE("column", column, size_t);
+            ADD_YAML_VALUE("column", column, int);
 
             if (node["font"])
             {
@@ -158,7 +157,7 @@ void udf_panel::Instance::loadModules() noexcept
                     refreshAfter = module["refresh-after"].as<float>();
 
                 // Add to modules as part of a column
-                modules[back.column].push_back({ .data = &back, .type = UDF_PANEL_EXEC_MODULE, .refreshAfter = refreshAfter });
+                modules[back.column].push_back({ .data = &back, .type = UDF_PANEL_EXEC_MODULE, .refreshAfter = refreshAfter, .timer = 0.0f, .bShouldRefresh = true });
             }
             else
             {

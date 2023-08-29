@@ -4,7 +4,7 @@ width: 100                                      # Width of the window in pixels.
 height: 100                                     # Height of the window in pixels. Panel size should be specified in its config, this value will not be honored
 fullscreen: false                               # Enable or disable fullscreen mode
 window-name: UntitledDesktop Flow Panel         # The name of the window
-resizeable: false                               # Can the window be resized
+resizeable: true                               # Can the window be resized
 transparent-surface: true                       # Transparency for the render surface, platform dependant, ImGuiCol_WindowBg.w controls this
 hidden: false                                   # The default visibility of the window
 focused: false                                  # Default focused state

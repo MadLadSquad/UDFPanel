@@ -19,9 +19,10 @@ void udf_panel::MainView::tick(float deltaTime)
 
     if (ImGui::BeginTable("table", inst->columns))
     {
+        ImGui::TableNextColumn();
         for (size_t i = 0; i < inst->columns; i++)
         {
-            ImGui::TableNextColumn();
+            ImGui::BeginGroup();
             for (auto& a : inst->modules[i])
             {
                 // Update the module timer
@@ -30,8 +31,9 @@ void udf_panel::MainView::tick(float deltaTime)
                 {
                     auto module = static_cast<ExecModule*>(a.data);
                     ImGui::PushFont(module->font->font);
+                    //ImGui::PushID(module->name.c_str());
 
-                    if (a.refreshAfter >= 0 && a.timer >= a.refreshAfter)
+                    if (a.refreshAfter >= 0 && a.timer >= a.refreshAfter && a.bShouldRefresh == false)
                     {
                         a.timer = 0.0f;
                         a.bShouldRefresh = true;
@@ -39,7 +41,7 @@ void udf_panel::MainView::tick(float deltaTime)
                     if (a.bShouldRefresh)
                         executeCommand(*module, module->command.data(), a.bShouldRefresh);
 
-                    ImGui::Text("%s %f", module->internalBuffer.c_str(), deltaTime);
+                    ImGui::Text("%s", module->internalBuffer.c_str());
                     if (ImGui::IsItemHovered())
                     {
                         bool tmp = true;
@@ -55,6 +57,8 @@ void udf_panel::MainView::tick(float deltaTime)
 
                 }
             }
+            ImGui::EndGroup();
+            ImGui::TableNextColumn();
         }
         ImGui::EndTable();
     }
@@ -73,12 +77,14 @@ udf_panel::MainView::~MainView()
 
 void udf_panel::MainView::executeCommand(udf_panel::ExecModule& module, char* command, bool& bShouldRefresh) noexcept
 {
-    module.internalBuffer.clear();
+    if (!module.internalBuffer.empty())
+        module.internalBuffer.clear();
     module.internalBuffer.resize(256);
 
     char* const cmds[] = { (char*)"bash", (char*)"-c", command, nullptr };
     uexec::ScriptRunner runner{};
     runner.init(cmds, false, true, false);
+    runner.update();
 
     size_t totalBytes = 0;
     while (!runner.finished())
@@ -86,9 +92,9 @@ void udf_panel::MainView::executeCommand(udf_panel::ExecModule& module, char* co
         size_t bytesWritten = 0;
         runner.readSTDOUT(module.internalBuffer, 256, bytesWritten);
         totalBytes += bytesWritten;
+        runner.update();
     }
     module.internalBuffer.resize(totalBytes);
-
     runner.destroy();
     bShouldRefresh = false;
 }
