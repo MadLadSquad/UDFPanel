@@ -25,7 +25,7 @@ void udf_panel::Instance::begin()
     UImGui::Window::Platform::setWindowShowingOnTaskbar(false);
 
     for (auto& font : fonts)
-        font.font = ImGui::GetIO().Fonts->AddFontFromFileTTF(font.name.c_str(), font.size, nullptr);
+        font.font = ImGui::GetIO().Fonts->AddFontFromFileTTF(font.location.c_str(), font.size, nullptr);
 }
 
 void udf_panel::Instance::tick(float deltaTime)
