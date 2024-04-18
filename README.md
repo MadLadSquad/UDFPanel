@@ -12,5 +12,6 @@ Features:
 1. Application modules - Runs an application and displays its text output
 1. Custom modules - Plugins created using the C plugin API
 
-## Preview
-
+## Building
+This is a standard [UntitledImGuiFramework](https://github.com/MadLadSquad/UntitledImGuiFramework) project. Building instructions can be found 
+[here](https://github.com/MadLadSquad/UntitledImGuiFramework/wiki/Collaborating-on-a-project-with-the-framework#setting-up-another-persons-project).
