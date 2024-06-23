@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 
+if (WIN32)
+    set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+endif()
+set(VULKAN_HEADERS_ENABLE_MODULE FALSE)
+
 function(enable_module_defs def)
     target_compile_definitions(UntitledImGuiFramework PRIVATE ${def})
     if (NOT WIN32)
@@ -7,12 +13,6 @@ function(enable_module_defs def)
     endif()
     target_compile_definitions(udf-panel PRIVATE ${def})
 endfunction()
-
-if (WIN32)
-    set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
-    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
-endif()
-set(VULKAN_HEADERS_ENABLE_MODULE FALSE)
 
 project(UntitledImGuiFramework)
 if (NOT WIN32)
@@ -40,7 +40,6 @@ if (BUILD_VARIANT_VENDOR OR WIN32)
     add_subdirectory(Framework/ThirdParty/glfw)
     set(GLFW_INCLUDE_DIRS "Framework/ThirdParty/glfw/include/")
     set(GLFW_LIBRARIES_T "glfw")
-
     if (WIN32)
         add_subdirectory(Framework/ThirdParty/glew)
         set(GLEW_INCLUDE_DIRS "Framework/ThirdParty/glew/include")
@@ -63,7 +62,6 @@ if (BUILD_VARIANT_VENDOR OR WIN32)
         set(X11_LIBRARIES "X11")
         set(VULKAN_LIBRARIES_T "vulkan")
     endif()
-
     add_subdirectory(Framework/ThirdParty/vulkan-headers)
     if (NOT BUILD_VARIANT_STATIC)
         set(BUILD_SHARED_LIBS ON)
@@ -262,7 +260,7 @@ include_directories("Source/" "Framework/" "Framework/ThirdParty/imgui/core/" "F
 if (NOT APPLE)
     link_directories("ThirdParty/glew/lib")
 endif()
-link_directories("Framework/ThirdParty/vulkan" UVKBuildTool/build)
+link_directories("Framework/ThirdParty/vulkan" "UVKBuildTool/build")
 
 if (UIMGUI_PLATFORM STREQUAL "DESKTOP")
     file(GLOB_RECURSE IMGUI_SRC "Framework/ThirdParty/imgui/backends/imgui_impl_glfw.cpp"
