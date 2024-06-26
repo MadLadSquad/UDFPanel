@@ -1,0 +1,21 @@
+function(custom_setup_step)
+endfunction()
+
+function(custom_compile_step)
+endfunction()
+
+set(USE_OS_MODULE ON)
+set(ENABLE_UEXEC ON)
+set(ENABLE_XDG_BASEDIR ON)
+set(ENABLE_DBUS_UTILS ON)
+
+set(USE_THEME_MODULE ON)
+set(USE_I18N_MODULE ON)
+set(USE_UNDO_MODULE ON)
+
+set(USE_PLOTTING_MODULE ON)
+set(USE_KNOBS_MODULE ON)
+set(USE_SPINNER_MODULE ON)
+set(USE_TOGGLES_MDOULE ON)
+set(USE_TEXT_UTILS_MODULE ON)
+set(USE_CLI_PARSER_MODULE ON)
