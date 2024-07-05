@@ -8,17 +8,19 @@ install-framework: true
 enabled-modules:
   os: true
   dbus: true
-  uexec: false
+  uexec: true
   theming: true
-  ufont: false
+  ufont: true
   i18n: true
-  undo_redo: false
-  plotting: false
-  knobs: false
-  spinners: false
-  toggles: false
-  text_utils: false
-  cli_parser: false
+  undo-redo: true
+  plotting: true
+  knobs: true
+  spinners: true
+  toggles: true
+  text-utils: true
+  cli-parser: true
+  xdg: true
+  open: true
 additional-installs:
   unix:
     - file: Config/Dist/com.madladsquad.udf-panel.desktop
