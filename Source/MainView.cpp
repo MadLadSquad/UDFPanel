@@ -1,18 +1,13 @@
 #include "MainView.hpp"
 #include "Instance.hpp"
 
-udf_panel::MainView::MainView()
-{
-
-}
-
-void udf_panel::MainView::begin()
+void udf_panel::MainView::begin() noexcept
 {
     beginAutohandle();
     inst = static_cast<udf_panel::Instance*>(UImGui::Instance::getGlobal());
 }
 
-void udf_panel::MainView::tick(float deltaTime)
+void udf_panel::MainView::tick(const float deltaTime) noexcept
 {
     tickAutohandle(deltaTime);
     ImGui::SetCursorPos({ 0.0f, inst->topMargin});
@@ -29,7 +24,7 @@ void udf_panel::MainView::tick(float deltaTime)
                 a.timer += (deltaTime);
                 if (a.type == UDF_PANEL_EXEC_MODULE && static_cast<ExecModule*>(a.data)->column == i)
                 {
-                    auto module = static_cast<ExecModule*>(a.data);
+                    const auto module = static_cast<ExecModule*>(a.data);
                     ImGui::PushFont(module->font->font);
                     //ImGui::PushID(module->name.c_str());
 
@@ -64,14 +59,9 @@ void udf_panel::MainView::tick(float deltaTime)
     }
 }
 
-void udf_panel::MainView::end()
+void udf_panel::MainView::end() noexcept
 {
     endAutohandle();
-
-}
-
-udf_panel::MainView::~MainView()
-{
 
 }
 

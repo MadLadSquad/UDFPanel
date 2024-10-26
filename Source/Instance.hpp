@@ -27,7 +27,7 @@ namespace udf_panel
 
         Font* font = nullptr;
 
-        UImGui::FString internalBuffer;
+        std::string internalBuffer;
     };
 
     enum ModuleType
@@ -47,26 +47,26 @@ namespace udf_panel
         bool bShouldRefresh = true;
     };
 
-    class UIMGUI_PUBLIC_API Instance : public UImGui::Instance
+    class UIMGUI_PUBLIC_API Instance final : public UImGui::Instance
     {
     public:
-        Instance();
-        virtual void begin() override;
-        virtual void tick(float deltaTime) override;
-        virtual void end() override;
-        virtual ~Instance() override;
+        Instance() noexcept;
+        virtual void begin() noexcept override;
+        virtual void tick(float deltaTime) noexcept override;
+        virtual void end() noexcept override;
+        virtual ~Instance() noexcept override = default;
 
-        virtual void onEventConfigureStyle(ImGuiStyle& style, ImGuiIO& io) override;
+        virtual void onEventConfigureStyle(ImGuiStyle& style, ImGuiIO& io) noexcept override;
 
-        std::vector<Font> fonts;
+        UImGui::TVector<Font> fonts;
     private:
         friend class MainView;
 
         MainView mainView;
 
         // TODO: Add plugin modules
-        std::vector<ExecModule> execModules;
-        std::vector<std::vector<Module>> modules;
+        UImGui::TVector<ExecModule> execModules;
+        UImGui::TVector<UImGui::TVector<Module>> modules;
 
         float topMargin = 0;
         UImGui::FVector2 position = { 0.0f, 0.0f };

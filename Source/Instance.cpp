@@ -1,6 +1,6 @@
 #include "Instance.hpp"
 
-udf_panel::Instance::Instance()
+udf_panel::Instance::Instance() noexcept
 {
     initInfo =
     {
@@ -11,7 +11,7 @@ udf_panel::Instance::Instance()
     };
 }
 
-void udf_panel::Instance::begin()
+void udf_panel::Instance::begin() noexcept
 {
     beginAutohandle();
 
@@ -28,24 +28,19 @@ void udf_panel::Instance::begin()
         font.font = ImGui::GetIO().Fonts->AddFontFromFileTTF(font.location.c_str(), font.size, nullptr);
 }
 
-void udf_panel::Instance::tick(float deltaTime)
+void udf_panel::Instance::tick(const float deltaTime) noexcept
 {
     tickAutohandle(deltaTime);
 
 }
 
-void udf_panel::Instance::end()
+void udf_panel::Instance::end() noexcept
 {
     endAutohandle();
 
 }
 
-udf_panel::Instance::~Instance()
-{
-
-}
-
-void udf_panel::Instance::onEventConfigureStyle(ImGuiStyle& style, ImGuiIO& io)
+void udf_panel::Instance::onEventConfigureStyle(ImGuiStyle& style, ImGuiIO& io) noexcept
 {
 
 }
@@ -79,7 +74,7 @@ namespace YAML
 
             if (node["font"])
             {
-                auto f = node["font"].as<UImGui::FString>();
+                const auto f = node["font"].as<UImGui::FString>();
                 for (auto& a : static_cast<udf_panel::Instance*>(UImGui::Instance::getGlobal())->fonts)
                 {
                     if (a.name == f)
@@ -103,7 +98,7 @@ void udf_panel::Instance::loadModules() noexcept
     }
     catch (YAML::BadFile&)
     {
-        Logger::log("Couldn't open the config file at: ", UVKLog::UVK_LOG_TYPE_ERROR, UIMGUI_CONFIG_DIR"Dist/UDFPanelConfig.yaml");
+        Logger::log("Couldn't open the config file at: ", ULOG_LOG_TYPE_ERROR, UIMGUI_CONFIG_DIR"Dist/UDFPanelConfig.yaml");
         std::terminate();
     }
 
@@ -133,7 +128,7 @@ void udf_panel::Instance::loadModules() noexcept
         {
             if (!font["file"])
                 continue;
-            fonts.push_back({ .name = font["font"].as<UImGui::FString>(), .location = font["file"].as<std::string>(), .size = font["size"].as<float>() });
+            fonts.emplace_back(font["font"].as<UImGui::FString>(), font["file"].as<UImGui::FString>(), font["size"].as<float>());
         }
     }
 
@@ -146,7 +141,7 @@ void udf_panel::Instance::loadModules() noexcept
                 continue;
             if (UImGui::Utility::toLower(module["type"].as<UImGui::FString>().c_str()) == "exec")
             {
-                execModules.push_back(module.as<ExecModule>());
+                execModules.emplace_back(module.as<ExecModule>());
                 auto& back = execModules.back();
 
                 // Set up columns
@@ -157,7 +152,7 @@ void udf_panel::Instance::loadModules() noexcept
                     refreshAfter = module["refresh-after"].as<float>();
 
                 // Add to modules as part of a column
-                modules[back.column].push_back({ .data = &back, .type = UDF_PANEL_EXEC_MODULE, .refreshAfter = refreshAfter, .timer = 0.0f, .bShouldRefresh = true });
+                modules[back.column].emplace_back(&back, UDF_PANEL_EXEC_MODULE, refreshAfter, 0.0f, true);
             }
             else
             {
