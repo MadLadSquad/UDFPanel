@@ -1,4 +1,6 @@
 layout-location: "DefaultLayout"                # The location of the layout file ImGui writes to
+load-layout: true                               # Whether to load the layout file ImGui writes to
+save-layout: true                               # Whether to automatically save to the layout file ImGui writes to
 icon: "udf-panel.png"                           # The location of the window icon image
 width: 100                                      # Width of the window in pixels. Panel size should be specified in its config, this value will not be honored
 height: 100                                     # Height of the window in pixels. Panel size should be specified in its config, this value will not be honored
